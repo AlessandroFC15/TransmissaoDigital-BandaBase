@@ -19,7 +19,7 @@
 
         <script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
         <script src="Chart.js"></script>
-        <script src="js/codificacao.js"></script>
+        
     </head>
     <body>
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -77,6 +77,14 @@
             <canvas id="skills" width="400" height="300"></canvas>
         </div>
       </div>
+	  
+	  <br>
+	  
+	  <div class="row">
+        <div class="col-md-12">
+            <canvas id="chartAMI" width="400" height="300"></canvas>
+        </div>
+      </div>
 
       <hr>
 
@@ -84,98 +92,12 @@
         <p>&copy; Company 2015</p>
       </footer>
     </div> <!-- /container -->       
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
+        <script src="js/vendor/jquery-1.11.2.min.js"></script>
 
         <script src="js/vendor/bootstrap.min.js"></script>
 
         <script src="js/main.js"></script>
     </body>
 
-    <script>
-
-        Chart.defaults.global.maintainAspectRatio = false;
-
-        var helper = {
-            '¬' : 1,
-            '_' : -1
-        };
-
-        var data = {
-            datasets: [
-                {
-                    label: "My First dataset",
-                    fill: false,
-                    lineTension: 0,
-                    backgroundColor: "rgba(75,192,192,0.4)",
-                    borderColor: "rgba(75,192,192,1)",
-                    borderCapStyle: 'butt',
-                    borderDash: [],
-                    borderDashOffset: 0.0,
-                    borderJoinStyle: 'miter',
-                    pointBorderColor: "rgba(75,192,192,1)",
-                    pointBackgroundColor: "#fff",
-                    pointBorderWidth: 1,
-                    pointHoverRadius: 5,
-                    pointHoverBackgroundColor: "rgba(75,192,192,1)",
-                    pointHoverBorderColor: "rgba(220,220,220,1)",
-                    pointHoverBorderWidth: 2,
-                    pointRadius: 1,
-                    pointHitRadius: 10,
-                    data: getDataGrafico(),
-                    spanGaps: false,
-                }
-            ]
-        };
-
-        var ctx = document.getElementById('skills').getContext('2d');
-        var myChart = new Chart(ctx, {
-          type: 'line',
-          data: data,
-          options: {
-                scales: {
-                    xAxes: [{
-                        type: 'linear',
-                        position: 'bottom',
-                        ticks: {
-                            display: false
-                        }
-                    }],
-                    yAxes: [{
-                        ticks: {
-                            max: helper['¬'] + 1,
-                            min: helper['_'] - 1,
-                            stepSize: 1
-                        }
-                    }]
-                }
-            }
-        });
-
-        function getDataGrafico() {
-        
-            var answer = '¬_¬¬__¬¬¬___¬';
-
-            var data = [], x = 0;
-
-            for (var i = 0; i < answer.length; i++) {
-                if (answer[i] === '¬') {
-                    data.push({x: x, y: helper['¬']});
-                    x++;
-                    data.push({x: x, y: helper['¬']});
-
-                   
-                } else if (answer[i] === '_') {
-                    data.push({x: x, y: helper['_']});
-                    x++;
-                    data.push({x: x, y: helper['_']});
-                }
-            }
-
-            console.log(data);
-
-            return data;
-
-        }
-
-      </script>
+    <script src="js/codificacao.js"></script>
 </html>
