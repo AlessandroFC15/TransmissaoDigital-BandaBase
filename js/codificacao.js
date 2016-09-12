@@ -5,7 +5,7 @@ String.prototype.replaceAll = function(search, replacement) {
     return target.replace(new RegExp(search, 'g'), replacement);
 };
 		
-var chartNRZ, chartAMI, chartPseudoternario, chartManchester, chartB8ZS;
+var chartNRZ, chartAMI, chartPseudoternario, chartManchester, chartB8ZS, chartHDB3, chartManchesterDiferencial;
 
 var criarChart = function(label, chartID, metodoGetDados, primaryColor, secondaryColor, codigoInicial) {
     var data = {
@@ -79,7 +79,9 @@ var updateGrafico = function(codigo) {
 	updateDadosGrafico(chartAMI, getDadosGraficoAMI, codigo);
 	updateDadosGrafico(chartPseudoternario, getDadosGraficoPseudoternario, codigo);
 	updateDadosGrafico(chartManchester, getDadosGraficoManchester, codigo);
-	updateDadosGrafico(chartB8ZS, getDadosGraficoB8ZS, codigo);
+    updateDadosGrafico(chartManchesterDiferencial, getDadosGraficoManchesterDiferencial, codigo);
+    updateDadosGrafico(chartB8ZS, getDadosGraficoB8ZS, codigo);
+	updateDadosGrafico(chartHDB3, getDadosGraficoHDB3, codigo);
 };
 
 function updateDadosGrafico(chart, getDadosGrafico, codigo) {
@@ -147,7 +149,7 @@ var getDadosGraficoPseudoternario = function(codigo) {
 	var voltagens = {
 		'0': 1,
 		'1': 0
-	}
+	};
 	
 	var data = [], x = 0;
 
@@ -198,8 +200,82 @@ var getDadosGraficoManchester = function(codigo) {
 	return data;
 };
 
+var getDadosGraficoManchesterDiferencial = function(codigo) {
+    var data = [], x = 0;
+
+    var lastUp = true;
+
+    for (var i = 0; i < codigo.length; i++) {
+        if (codigo[i] === '0') {
+            if (lastUp) {
+                data.push({x: x, y: -1});
+                x += 0.5;
+                data.push({x: x, y: -1});
+
+                data.push({x: x, y: 1});
+                x += 0.5;
+                data.push({x: x, y: 1});
+            } else {
+                data.push({x: x, y: 1});
+                x += 0.5;
+                data.push({x: x, y: 1});
+
+                data.push({x: x, y: -1});
+                x += 0.5;
+                data.push({x: x, y: -1});
+
+                lastUp = false;
+            }
+        } else if (codigo[i] === '1') {
+            if (lastUp) {
+                data.push({x: x, y: 1});
+                x += 0.5;
+                data.push({x: x, y: 1});
+
+                data.push({x: x, y: -1});
+                x += 0.5;
+                data.push({x: x, y: -1});
+
+                lastUp = false;
+            } else {
+                data.push({x: x, y: -1});
+                x += 0.5;
+                data.push({x: x, y: -1});
+
+                data.push({x: x, y: 1});
+                x += 0.5;
+                data.push({x: x, y: 1});
+
+                lastUp = true;
+            }
+        }
+    }
+
+    return data;
+};
+
 var getDadosGraficoB8ZS = function(codigo) {
     var codigoScramble = scrambleCodigoB8ZS(codigo);
+
+    var data = [], x = 0;
+
+    var voltagens = {
+        '0': 0,
+        '+': 1,
+        '-': -1
+    };
+
+    for (var i = 0; i < codigoScramble.length; i++) {
+        data.push({x: x, y: voltagens[codigoScramble[i]]});
+        x++;
+        data.push({x: x, y: voltagens[codigoScramble[i]]});
+    }
+
+    return data;
+};
+
+var getDadosGraficoHDB3 = function(codigo) {
+    var codigoScramble = scrambleCodigoHDB3(codigo);
 
     var data = [], x = 0;
 
@@ -237,12 +313,38 @@ var scrambleCodigoB8ZS = function(codigo) {
     return codigoAMI.replaceAll('\\+00000000', '+000+-0−+').replaceAll('-00000000', '-000-+0+-');
 };
 
+var scrambleCodigoHDB3 = function (codigo) {
+	codigo = codigo.replace('0000', '000V').replaceAll('0000', 'B00V');
+
+	var codigoAMI = '';
+	var pulsoPositivo = true;
+
+	for (var i = 0; i < codigo.length; i++) {
+		if (codigo[i] === '0') {
+			codigoAMI += '0'
+		} else if ((codigo[i] === '1' || codigo[i] === 'B') && (pulsoPositivo)) {
+			codigoAMI += '+';
+			pulsoPositivo = false;
+		} else if ((codigo[i] === '1' || codigo[i] === 'B') && (! pulsoPositivo)) {
+			codigoAMI += '-';
+			pulsoPositivo = true;
+		} else if (codigo[i] === 'V') {
+			codigoAMI += (pulsoPositivo ? '-' : '+');
+		}
+	}
+
+	return codigoAMI;
+};
+
 $(document).ready( function() {
-	var codigoInicial = '01001100011';
+	var codigoInicial = '0100110100';
 
     chartNRZ = criarChart('NRZ', 'chartNRZ', getDadosGraficoNRZ, "rgba(75,192,192,1)", "rgba(75,192,192,0.4)", codigoInicial);
     chartAMI = criarChart('Bipolar-AMI', 'chartAMI', getDadosGraficoAMI, "rgba(55,12,92,1)", "rgba(55,12,92,0.4)", codigoInicial);
     chartPseudoternario = criarChart('Pseudoternário', 'chartPseudoternario', getDadosGraficoPseudoternario, "rgba(13, 71, 161, 1)", "rgba(13, 71, 161, 0.4)", codigoInicial);
     chartManchester = criarChart('Manchester', 'chartManchester', getDadosGraficoManchester, "rgba(183, 28, 28, 1)", "rgba(183, 28, 28, 0.4)", codigoInicial);
-    chartB8ZS = criarChart('B8ZS', 'chartB8ZS', getDadosGraficoB8ZS, "rgba(183, 28, 28, 1)", "rgba(183, 28, 28, 0.4)", codigoInicial);
+    chartManchesterDiferencial = criarChart('Manchester Diferencial', 'chartManchesterDiferencial', getDadosGraficoManchesterDiferencial, "rgba(66, 66, 66, 1)", "rgba(66, 66, 66, 0.4)", codigoInicial);
+    chartB8ZS = criarChart('B8ZS', 'chartB8ZS', getDadosGraficoB8ZS, "rgba(0, 105, 192, 1)", "rgba(0, 105, 192, 0.4)", codigoInicial);
+    chartHDB3 = criarChart('HDB3', 'chartHDB3', getDadosGraficoHDB3, "rgba(230, 81, 0, 1)", "rgba(230, 81, 0, 0.4)", codigoInicial);
+
 });
