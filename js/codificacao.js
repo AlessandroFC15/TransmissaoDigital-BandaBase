@@ -100,51 +100,42 @@ function updateDadosGrafico(chart, getDadosGrafico, codigo) {
 }
 
 var getDadosGraficoNRZ = function (codigo) {
-    var helper = {
-        '0': 1,
-        '1': -1
-    };
+	var helper = {
+		'0': 1,
+		'1': -1
+	};
 
-    var data = [], x = 0;
+	var data = [], x = 0;
 
-    for (var i = 0; i < codigo.length; i++) {
-        if (codigo[i] === '0') {
-            data.push({x: x, y: helper['0']});
-            x++;
-            data.push({x: x, y: helper['0']});
-        } else if (codigo[i] === '1') {
-            data.push({x: x, y: helper['1']});
-            x++;
-            data.push({x: x, y: helper['1']});
-        }
-    }
+	// Partimos da premissa de que o código será composto apenas de 0's e 1's
+	
+	for (var i = 0; i < codigo.length; i++) {
+		data.push({x: x, y: helper[codigo[i]]});
+		x++;
+		data.push({x: x, y: helper[codigo[i]]});
+	}
 
-    return data;
+	return data;
 };
 
 var getDadosGraficoNRZ_I = function (codigo) {
-    var helper = {
-        true: 1,
-        false: -1
-    };
+	var helper = {
+		true: 1,
+		false: -1
+	};
 
-    var data = [], x = 0, lastUp = false;
+	var data = [], x = 0, lastUp = true;
 
-    for (var i = 0; i < codigo.length; i++) {
-        if (codigo[i] === '0') {
-            data.push({x: x, y: helper[lastUp]});
-            x++;
-            data.push({x: x, y: helper[lastUp]});
-        } else if (codigo[i] === '1') {
-            lastUp = ! lastUp;
+	for (var i = 0; i < codigo.length; i++) {
+		if (codigo[i] === '1')
+			lastUp = ! lastUp;
+		
+		data.push({x: x, y: helper[lastUp]});
+		x++;
+		data.push({x: x, y: helper[lastUp]});
+	}
 
-            data.push({x: x, y: helper[lastUp]});
-            x++;
-            data.push({x: x, y: helper[lastUp]});
-        }
-    }
-
-    return data;
+	return data;
 };
 
 var getDadosGraficoAMI = function (codigo) {
@@ -210,29 +201,29 @@ var getDadosGraficoPseudoternario = function (codigo) {
 };
 
 var getDadosGraficoManchester = function (codigo) {
-    var data = [], x = 0;
+	var data = [], x = 0;
 
-    for (var i = 0; i < codigo.length; i++) {
-        if (codigo[i] === '0') {
-            data.push({x: x, y: 1});
-            x += 0.5;
-            data.push({x: x, y: 1});
+	for (var i = 0; i < codigo.length; i++) {
+		if (codigo[i] === '0') {
+			data.push({x: x, y: 1});
+			x += 0.5;
+			data.push({x: x, y: 1});
 
-            data.push({x: x, y: -1});
-            x += 0.5;
-            data.push({x: x, y: -1});
-        } else if (codigo[i] === '1') {
-            data.push({x: x, y: -1});
-            x += 0.5;
-            data.push({x: x, y: -1});
+			data.push({x: x, y: -1});
+			x += 0.5;
+			data.push({x: x, y: -1});
+		} else if (codigo[i] === '1') {
+			data.push({x: x, y: -1});
+			x += 0.5;
+			data.push({x: x, y: -1});
 
-            data.push({x: x, y: 1});
-            x += 0.5;
-            data.push({x: x, y: 1});
-        }
-    }
+			data.push({x: x, y: 1});
+			x += 0.5;
+			data.push({x: x, y: 1});
+		}
+	}
 
-    return data;
+	return data;
 };
 
 var getDadosGraficoManchesterDiferencial = function (codigo) {
@@ -292,8 +283,6 @@ var getDadosGraficoManchesterDiferencial = function (codigo) {
 var getDadosGraficoB8ZS = function (codigo) {
     var codigoScramble = scrambleCodigoB8ZS(codigo);
 
-    console.log(codigoScramble);
-
     var data = [], x = 0;
 
     var voltagens = {
@@ -332,45 +321,48 @@ var getDadosGraficoHDB3 = function (codigo) {
 };
 
 var scrambleCodigoB8ZS = function (codigo) {
-    var codigoAMI = '';
-    var pulsoPositivo = true;
+	var digitoPadrão = '+'
+	var codigoAMI = '';
+	var pulsoPositivo = true;
 
-    for (var i = 0; i < codigo.length; i++) {
-        if (codigo[i] === '0') {
-            codigoAMI += '0'
-        } else if ((codigo[i] === '1') && (pulsoPositivo)) {
-            codigoAMI += '+';
-            pulsoPositivo = false;
-        } else if ((codigo[i] === '1') && (!pulsoPositivo)) {
-            codigoAMI += '-';
-            pulsoPositivo = true;
-        }
-    }
+	for (var i = 0; i < codigo.length; i++) {
+		if (codigo[i] === '0') {
+			codigoAMI += '0'
+		} else if ((codigo[i] === '1') && (pulsoPositivo)) {
+			codigoAMI += '+';
+			pulsoPositivo = false;
+		} else if ((codigo[i] === '1') && (!pulsoPositivo)) {
+			codigoAMI += '-';
+			pulsoPositivo = true;
+		}
+	}
 
-    return codigoAMI.replaceAll('\\+0{8}', '+000+-0-+').replaceAll('-0{8}', '-000-+0+-');
+	return codigoAMI.replaceAll('\\+0{8}', '+000+-0-+').replaceAll('-0{8}', '-000-+0+-');
 };
 
 var scrambleCodigoHDB3 = function (codigo) {
-    codigo = codigo.replace('0000', '000V').replaceAll('0000', 'B00V');
+	codigo = codigo.replace('0000', '000V').replaceAll('0000', 'B00V');
 
-    var codigoAMI = '';
-    var pulsoPositivo = true;
+	var codigoAMI = '';
+	var pulsoPositivo = true;
 
-    for (var i = 0; i < codigo.length; i++) {
-        if (codigo[i] === '0') {
-            codigoAMI += '0'
-        } else if ((codigo[i] === '1' || codigo[i] === 'B') && (pulsoPositivo)) {
-            codigoAMI += '+';
-            pulsoPositivo = false;
-        } else if ((codigo[i] === '1' || codigo[i] === 'B') && (!pulsoPositivo)) {
-            codigoAMI += '-';
-            pulsoPositivo = true;
-        } else if (codigo[i] === 'V') {
-            codigoAMI += (pulsoPositivo ? '-' : '+');
-        }
-    }
+	for (var i = 0; i < codigo.length; i++) {
+		if (codigo[i] === '0') {
+			codigoAMI += '0'
+		} else if ((codigo[i] === '1' || codigo[i] === 'B') && (pulsoPositivo)) {
+			codigoAMI += '+';
+			pulsoPositivo = false;
+		} else if ((codigo[i] === '1' || codigo[i] === 'B') && (!pulsoPositivo)) {
+			codigoAMI += '-';
+			pulsoPositivo = true;
+		} else if (codigo[i] === 'V') {
+			codigoAMI += (pulsoPositivo ? '-' : '+');
+		}
+	}
 
-    return codigoAMI;
+	return codigoAMI;
+	
+	
 };
 
 $(document).ready(function () {
